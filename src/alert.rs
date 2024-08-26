@@ -2,8 +2,10 @@ use notify_rust::Notification;
 use rodio::{Decoder, OutputStream, Sink};
 use std::{io::Cursor, thread};
 
-static CARGO_ROOT: &str = env!("CARGO_MANIFEST_DIR");
-static NOTIFICATION_FILE: &str = "/assets/notification/level-up.mp3";
+static NOTIFICATION_SOUND: &str = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"), // Project root
+    "/assets/notification/level-up.mp3"
+));
 
 #[derive(Debug, thiserror::Error)]
 pub enum AlertError {
@@ -81,10 +83,7 @@ pub fn play_bell() -> Result<(), SoundError> {
     let (_stream, stream_handle) = OutputStream::try_default()?;
 
     // let volume = 0.5;
-    let audio = Decoder::new(Cursor::new(include_bytes!(concat!(
-        CARGO_ROOT,
-        NOTIFICATION_FILE
-    ))))?;
+    let audio = Decoder::new(Cursor::new(NOTIFICATION_SOUND))?;
     Sink::try_new(&stream_handle).map(|sink| {
         sink.append(audio);
         // sink.set_volume(volume);
